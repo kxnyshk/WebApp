@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Avatar from '../img/addAvatar.png';
+import { useNavigate, Link } from 'react-router-dom';
 import { auth, storage, db } from '../firebase.js';
 import { doc, setDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 export const Register = () => {
+  const [err, setErr] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,11 +32,14 @@ export const Register = () => {
           await setDoc(doc(db, 'users', res.user.uid), {
             uid:res.user.uid, displayName, email, photoURL:downloadURL
           });
+          await setDoc(doc(db, 'userChats', res.user.uid), {});
+          navigate('/');
         });
       });
     } catch (error) {
-      alert('auth error detected!');
-      console.log(error);
+      setErr(true);
+      // alert('auth error detected!');
+      // console.log(error);
     }
   }
 
@@ -52,8 +58,9 @@ export const Register = () => {
             Pick your Avatar
           </label>
           <button>Sign Up</button>
+          {err && <span>Oops! something went wrong :(</span>}
         </form>
-        <p>Already have an account? Login</p>
+        <p>Already have an account? <Link to='/login'>Login</Link></p>
       </div>
     </div>
   )
